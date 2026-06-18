@@ -2,6 +2,19 @@
 
 This repository contains Terraform code to provision an end-to-end data platform on AWS, leveraging Databricks for advanced analytics and data processing. The infrastructure is designed to handle both real-time data ingestion and scheduled batch processing.
 
+## The two repositories
+
+This repo is the **infrastructure layer** of **lmx**; its sibling, [lmx-data](https://github.com/your-account/lmx-data), is the **data layer**.
+
+The boundary is deliberate: **this repo owns *where things live*; `lmx-data` owns *what runs in them*.** Terraform here provisions the foundation — AWS resources, Databricks workspaces, Unity Catalog catalogs/schemas and grants, SQL warehouses, and the Lakebase serving layer. The data layer treats those as a given (it never runs `CREATE SCHEMA`) and deploys connectors, medallion transforms, and serving pipelines with **Databricks Asset Bundles (DABs)** — exposing the gold layer to a frontend app, Databricks Apps, Genie, Lakebase synced tables, and AI/ML workloads.
+
+Why two repos:
+
+- **Independent lifecycles** — foundation changes are rare and deliberate; data pipelines change constantly.
+- **Smaller blast radius** — `terraform plan/apply` against catalogs, workspaces, and IAM stays isolated from day-to-day pipeline edits.
+- **Least-privilege ownership** — Terraform state and cloud-admin live here; data engineers never need them.
+- **One toolchain per repo** — Terraform here, DABs there — clean, separate CI for each.
+
 ## High-Level Architecture
 
 The project deploys the following key components:
